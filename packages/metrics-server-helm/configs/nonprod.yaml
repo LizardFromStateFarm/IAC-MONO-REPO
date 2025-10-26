@@ -1,0 +1,10 @@
+namespace: "kube-system"
+chart_version: "3.10.0"
+args:
+  - "--cert-dir=/tmp"
+  - "--secure-port=4443"
+  - "--kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname"
+  - "--kubelet-use-node-status-port"
+  - "--metric-resolution=15s"
+host_network: false
+replicas: 1

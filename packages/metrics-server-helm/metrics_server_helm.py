@@ -3,6 +3,8 @@ import pulumi_kubernetes as k8s
 from pulumi_kubernetes import helm
 from typing import Optional, Dict, Any, List
 from dataclasses import dataclass
+import yaml
+import os
 
 
 @dataclass
@@ -13,6 +15,20 @@ class MetricsServerHelmConfig:
     args: Optional[List[str]] = None
     host_network: Optional[bool] = False
     replicas: Optional[int] = 1
+
+    @classmethod
+    def from_environment(cls, environment: str) -> 'MetricsServerHelmConfig':
+        """Load configuration from environment-specific YAML file."""
+        package_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        config_file = os.path.join(package_dir, 'metrics-server-helm', 'configs', f'{environment}.yaml')
+        
+        if not os.path.exists(config_file):
+            raise FileNotFoundError(f"Configuration file not found: {config_file}")
+        
+        with open(config_file, 'r') as f:
+            config_data = yaml.safe_load(f)
+        
+        return cls(**config_data)
 
 
 class MetricsServerHelm(pulumi.ComponentResource):

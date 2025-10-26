@@ -1,6 +1,0 @@
-name: nonprod
-runtime:
-  name: python
-  options:
-    virtualenv: venv
-description: Non-production environment for minikube cluster with Grafana and metrics server

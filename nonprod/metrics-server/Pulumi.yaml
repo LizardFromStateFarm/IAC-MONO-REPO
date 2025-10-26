@@ -1,0 +1,5 @@
+name: metrics-server
+runtime:
+  name: python
+  options:
+    virtualenv: ../venv

@@ -36,12 +36,12 @@ This is a Pulumi monorepo project that manages Kind (Kubernetes in Docker) envir
 ## Quick Start
 
 1. **Install dependencies:**
-   ```bash
+   ```powershell
    python utilities/scripts/install-dependencies.py
    ```
 
-2. **Deploy environments:**
-   ```bash
+2. **Deploy environments (MANUALLY):**
+   ```powershell
    # Deploy nonprod (creates Kind cluster automatically)
    cd nonprod
    pulumi stack init nonprod
@@ -104,14 +104,14 @@ Deploys Kubernetes metrics server using Helm charts.
 ## Usage
 
 ### Deploying to Nonprod
-```bash
+```powershell
 cd nonprod
 pulumi stack select nonprod
 pulumi up
 ```
 
 ### Deploying to Prod
-```bash
+```powershell
 cd prod
 pulumi stack select prod
 pulumi up
@@ -127,7 +127,7 @@ After deployment, you can access services:
 
 ### Managing Kind Clusters
 
-```bash
+```powershell
 # List all Kind clusters
 python utilities/scripts/kind-management.py list
 
@@ -158,7 +158,7 @@ You can customize deployments by modifying the configuration in each environment
 
 All packages are Python packages with `setup.py` files and can be installed using pip:
 
-```bash
+```powershell
 # Install a specific package
 pip install -e packages/kind-cluster
 
@@ -193,7 +193,7 @@ The `utilities/` directory contains:
 
 ### Useful Commands
 
-```bash
+```powershell
 # Check Kind clusters
 kind get clusters
 

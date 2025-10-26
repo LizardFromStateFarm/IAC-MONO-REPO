@@ -1,0 +1,13 @@
+cluster_name: "prod-kind"
+kubernetes_version: "v1.28.0"
+worker_nodes: 2
+nodes: 1
+port_mappings:
+  - containerPort: 30000
+    hostPort: 30000
+    protocol: "TCP"
+  - containerPort: 30001
+    hostPort: 30001
+    protocol: "TCP"
+wait_for_ready: true
+wait_for_ready_timeout: "300s"

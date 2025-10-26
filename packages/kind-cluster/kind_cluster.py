@@ -4,6 +4,8 @@ import pulumi_command as command
 from typing import Optional, Dict, Any, List
 from dataclasses import dataclass
 import json
+import yaml
+import os
 
 
 @dataclass
@@ -16,6 +18,20 @@ class KindClusterConfig:
     extra_port_mappings: Optional[List[Dict[str, Any]]] = None
     wait_for_ready: Optional[bool] = True
     wait_for_ready_timeout: Optional[str] = "300s"
+
+    @classmethod
+    def from_environment(cls, environment: str) -> 'KindClusterConfig':
+        """Load configuration from environment-specific YAML file."""
+        package_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        config_file = os.path.join(package_dir, 'kind-cluster', 'configs', f'{environment}.yaml')
+        
+        if not os.path.exists(config_file):
+            raise FileNotFoundError(f"Configuration file not found: {config_file}")
+        
+        with open(config_file, 'r') as f:
+            config_data = yaml.safe_load(f)
+        
+        return cls(**config_data)
 
 
 class KindCluster(pulumi.ComponentResource):

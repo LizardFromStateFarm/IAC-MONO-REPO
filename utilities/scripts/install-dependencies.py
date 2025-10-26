@@ -93,9 +93,10 @@ def main():
     
     print("\nAll dependencies installed successfully!")
     print("\nNext steps:")
-    print("1. Run 'cd nonprod && pulumi up' to deploy nonprod environment")
-    print("2. Run 'cd prod && pulumi up' to deploy prod environment")
+    print("1. MANUALLY run: cd nonprod && pulumi up")
+    print("2. MANUALLY run: cd prod && pulumi up")
     print("3. Access Grafana at http://localhost:30000 (admin/admin123 for nonprod)")
+    print("\nIMPORTANT: Project deployment must be done MANUALLY!")
 
 
 if __name__ == "__main__":
