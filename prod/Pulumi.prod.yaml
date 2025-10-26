@@ -1,0 +1,5 @@
+config:
+  prod:clusterName: prod-minikube
+  prod:nodeCount: 2
+  prod:memory: 8g
+  prod:cpu: 4

@@ -1,0 +1,5 @@
+config:
+  nonprod:clusterName: nonprod-minikube
+  nonprod:nodeCount: 1
+  nonprod:memory: 4g
+  nonprod:cpu: 2

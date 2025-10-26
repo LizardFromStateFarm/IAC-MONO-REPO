@@ -1,0 +1,6 @@
+name: prod
+runtime:
+  name: python
+  options:
+    virtualenv: venv
+description: Production environment for minikube cluster with Grafana and metrics server
