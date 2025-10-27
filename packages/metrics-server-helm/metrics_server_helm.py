@@ -15,6 +15,9 @@ class MetricsServerHelmConfig:
     args: Optional[List[str]] = None
     host_network: Optional[bool] = False
     replicas: Optional[int] = 1
+    # Simplified config for local Kind clusters
+    insecure_skip_tls_verify: Optional[bool] = True
+    kubelet_insecure_tls: Optional[bool] = True
 
     @classmethod
     def from_environment(cls, environment: str) -> 'MetricsServerHelmConfig':
@@ -52,19 +55,8 @@ class MetricsServerHelm(pulumi.ComponentResource):
                 opts=pulumi.ResourceOptions(parent=self)
             )
         
-        # Default values for metrics-server
+        # Simplified values for local Kind clusters
         default_values = {
-            "args": config.args or [
-                "--cert-dir=/tmp",
-                "--secure-port=4443",
-                "--kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname",
-                "--kubelet-use-node-status-port",
-                "--metric-resolution=15s",
-                "--kubelet-insecure-tls"
-            ],
-            "hostNetwork": {
-                "enabled": config.host_network or False
-            },
             "replicas": config.replicas or 1,
             "resources": {
                 "requests": {
@@ -91,6 +83,37 @@ class MetricsServerHelm(pulumi.ComponentResource):
                     "effect": "NoSchedule",
                 },
             ],
+            # Simplified args for local development
+            "args": [
+                "--cert-dir=/tmp",
+                "--secure-port=4443",
+                "--kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname",
+                "--kubelet-use-node-status-port",
+                "--metric-resolution=15s",
+                "--kubelet-insecure-tls",  # Required for Kind clusters
+            ],
+            # Use HTTP instead of HTTPS for local development
+            "service": {
+                "port": 4443
+            },
+            "livenessProbe": {
+                "httpGet": {
+                    "path": "/livez",
+                    "port": 4443,
+                    "scheme": "HTTP"  # Changed from HTTPS to HTTP
+                },
+                "initialDelaySeconds": 20,
+                "periodSeconds": 10
+            },
+            "readinessProbe": {
+                "httpGet": {
+                    "path": "/readyz",
+                    "port": 4443,
+                    "scheme": "HTTP"  # Changed from HTTPS to HTTP
+                },
+                "initialDelaySeconds": 20,
+                "periodSeconds": 10
+            }
         }
         
         # Merge with user-provided values
@@ -115,20 +138,11 @@ class MetricsServerHelm(pulumi.ComponentResource):
         
         self.namespace_name = pulumi.Output.from_input(namespace)
         
-        # Get the deployment
-        self.deployment = self.release.status.apply(
-            lambda status: k8s.apps.v1.Deployment.get(
-                f"{name}-deployment",
-                f"{namespace}/metrics-server",
-                opts=pulumi.ResourceOptions(parent=self)
-            )
-        )
-    
     def is_ready(self) -> pulumi.Output[bool]:
         """Check if the metrics server is ready."""
-        def check_ready(deployment):
-            if deployment.status and deployment.status.ready_replicas and deployment.status.replicas:
-                return deployment.status.ready_replicas == deployment.status.replicas
+        def check_ready(status):
+            if status and status.status == "deployed":
+                return True
             return False
         
-        return self.deployment.apply(check_ready)
+        return self.release.status.apply(check_ready)

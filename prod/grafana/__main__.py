@@ -13,7 +13,8 @@ config = pulumi.Config()
 environment = config.get("environment") or "prod"
 
 # Get kubeconfig from Kind cluster stack
-kind_stack = pulumi.StackReference("kind-cluster", stack_name="prod/kind-cluster")
+# Using local stack reference since we're using local state
+kind_stack = pulumi.StackReference("kind-cluster", stack_name="prod")
 kubeconfig = kind_stack.get_output("kubeconfig")
 
 # Create Kubernetes provider using the Kind cluster kubeconfig
