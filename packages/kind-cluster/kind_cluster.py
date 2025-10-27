@@ -18,6 +18,9 @@ class KindClusterConfig:
     extra_port_mappings: Optional[List[Dict[str, Any]]] = None
     wait_for_ready: Optional[bool] = True
     wait_for_ready_timeout: Optional[str] = "300s"
+    # Memory configuration
+    node_memory: Optional[str] = "2Gi"  # Memory per node
+    total_memory_limit: Optional[str] = "4Gi"  # Total cluster memory limit
 
     @classmethod
     def from_environment(cls, environment: str) -> 'KindClusterConfig':
@@ -97,6 +100,9 @@ class KindCluster(pulumi.ComponentResource):
             "image": f"kindest/node:{config.kubernetes_version}",
         }
         
+        # Memory configuration will be handled by Docker Desktop resource limits
+        # No need for kubelet patches that can cause startup issues
+        
         # Add port mappings if specified
         if config.port_mappings:
             control_plane["extraPortMappings"] = config.port_mappings
@@ -114,6 +120,10 @@ class KindCluster(pulumi.ComponentResource):
                 "role": "worker",
                 "image": f"kindest/node:{config.kubernetes_version}",
             }
+            
+            # Memory configuration will be handled by Docker Desktop resource limits
+            # No need for kubelet patches that can cause startup issues
+            
             kind_config["nodes"].append(worker)
         
         return json.dumps(kind_config, indent=2)

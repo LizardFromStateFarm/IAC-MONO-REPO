@@ -59,9 +59,12 @@ class MetricsServerHelm(pulumi.ComponentResource):
                 "--secure-port=4443",
                 "--kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname",
                 "--kubelet-use-node-status-port",
-                "--metric-resolution=15s"
+                "--metric-resolution=15s",
+                "--kubelet-insecure-tls"
             ],
-            "hostNetwork": config.host_network or False,
+            "hostNetwork": {
+                "enabled": config.host_network or False
+            },
             "replicas": config.replicas or 1,
             "resources": {
                 "requests": {

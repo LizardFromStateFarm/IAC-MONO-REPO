@@ -1,6 +1,6 @@
 cluster_name: "prod-kind"
 kubernetes_version: "v1.28.0"
-worker_nodes: 2
+worker_nodes: 1  # 1 control plane + 1 worker = 2 nodes total
 nodes: 1
 port_mappings:
   - containerPort: 30000

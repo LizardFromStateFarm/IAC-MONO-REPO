@@ -13,7 +13,8 @@ config = pulumi.Config()
 environment = config.get("environment") or "nonprod"
 
 # Get kubeconfig from Kind cluster stack
-kind_stack = pulumi.StackReference("kind-cluster", stack_name="nonprod/kind-cluster")
+# Note: You'll need to replace 'LizardFromStateFarm-org' with your actual Pulumi organization name
+kind_stack = pulumi.StackReference("kind-cluster", stack_name="LizardFromStateFarm-org/kind-cluster/nonprod")
 kubeconfig = kind_stack.get_output("kubeconfig")
 
 # Create Kubernetes provider using the Kind cluster kubeconfig
