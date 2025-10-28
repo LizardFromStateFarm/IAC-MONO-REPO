@@ -6,7 +6,9 @@ This directory contains Pulumi infrastructure-as-code examples for different env
 
 ```
 pulumi/
-├── local/kind/          # Local Kind cluster examples
+├── local/
+│   ├── kind/           # Local Kind cluster examples
+│   └── k3s/            # Local K3s cluster examples (Podman)
 ├── aws/eks/            # AWS EKS cluster examples
 ├── gcp/gke/            # GCP GKE cluster examples
 ├── packages/           # Reusable Pulumi packages
@@ -14,37 +16,59 @@ pulumi/
 └── examples/           # Additional examples
 ```
 
-## Local Development (Kind)
+## Local Development
+
+### K3s with Podman (Recommended)
+
+The `local/k3s/` directory contains examples for local Kubernetes development using K3s with Podman as the container runtime.
+
+**Features:**
+- K3s cluster management with Podman
+- Better performance than Docker Desktop
+- Environment-specific configurations (nonprod/prod)
+- Configurable resource allocation
+- Port mapping for host access
+
+**Quick Start:**
+```bash
+# Deploy nonprod environment
+cd local/k3s/nonprod
+pip install -r requirements.txt
+pulumi stack init nonprod
+pulumi up
+
+# Deploy prod environment
+cd local/k3s/prod
+pip install -r requirements.txt
+pulumi stack init prod
+pulumi up
+```
+
+### Kind with Docker
 
 The `local/kind/` directory contains examples for local Kubernetes development using Kind (Kubernetes in Docker).
 
-### Features
+**Features:**
 - Kind cluster management
 - Grafana monitoring
 - Metrics server deployment
 - Environment-specific configurations (nonprod/prod)
 
-### Quick Start
+**Quick Start:**
+```bash
+# Install dependencies
+python utilities/scripts/install-dependencies.py
 
-1. **Prerequisites:**
-   ```bash
-   # Install dependencies
-   python utilities/scripts/install-dependencies.py
-   ```
+# Deploy nonprod environment
+cd local/kind/nonprod
+pulumi stack init nonprod
+pulumi up
 
-2. **Deploy nonprod environment:**
-   ```bash
-   cd local/kind/nonprod
-   pulumi stack init nonprod
-   pulumi up
-   ```
-
-3. **Deploy prod environment:**
-   ```bash
-   cd local/kind/prod
-   pulumi stack init prod
-   pulumi up
-   ```
+# Deploy prod environment
+cd local/kind/prod
+pulumi stack init prod
+pulumi up
+```
 
 ## Cloud Providers
 
@@ -88,6 +112,7 @@ pulumi up
 
 The `packages/` directory contains reusable Pulumi components:
 
+- **k3s-cluster**: K3s cluster management with Podman support
 - **kind-cluster**: Kind cluster management
 - **grafana-helm**: Grafana deployment via Helm
 - **metrics-server-helm**: Metrics server deployment via Helm
@@ -105,8 +130,10 @@ The `utilities/` directory contains helper scripts and common utilities:
 
 - [Pulumi CLI](https://www.pulumi.com/docs/get-started/install/)
 - [Python](https://www.python.org/) (3.8 or later)
-- [Docker](https://www.docker.com/) (for Kind clusters)
-- [Kind](https://kind.sigs.k8s.io/docs/user/quick-start/) (for local development)
+- [Podman](https://podman.io/) (for K3s clusters - recommended)
+- [Docker](https://www.docker.com/) (for Kind clusters - fallback)
+- [K3s](https://k3s.io/) (for local K3s development)
+- [Kind](https://kind.sigs.k8s.io/docs/user/quick-start/) (for local Kind development)
 - [kubectl](https://kubernetes.io/docs/tasks/tools/)
 - Cloud provider CLI tools (AWS CLI, gcloud CLI)
 

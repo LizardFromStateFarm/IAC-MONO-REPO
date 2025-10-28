@@ -1,0 +1,32 @@
+cluster_name: "k3s-prod"
+kubernetes_version: "v1.28.0"
+nodes: 1
+worker_nodes: 2
+port_mappings:
+  - containerPort: 80
+    hostPort: 8080
+    protocol: TCP
+  - containerPort: 443
+    hostPort: 8443
+    protocol: TCP
+  - containerPort: 30000
+    hostPort: 30000
+    protocol: TCP
+wait_for_ready: true
+wait_for_ready_timeout: "300s"
+node_memory: "4Gi"
+total_memory_limit: "8Gi"
+disable_components:
+  - "traefik"  # Disable default ingress controller
+  - "servicelb"  # Disable default load balancer
+enable_components:
+  - "metrics-server"
+podman_runtime: true
+k3s_image: null  # Use default
+cluster_cidr: "10.42.0.0/16"
+service_cidr: "10.43.0.0/16"
+cluster_dns: "10.43.0.10"
+# Metrics server configuration
+enable_metrics_server: true
+metrics_server_namespace: "kube-system"
+metrics_server_replicas: 1
