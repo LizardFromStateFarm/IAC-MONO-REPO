@@ -1,249 +1,162 @@
-# Pulumi Kind Monorepo (Python)
+# Infrastructure as Code Monorepo
 
-This is a Pulumi monorepo project that manages Kind (Kubernetes in Docker) environments (nonprod and prod) with Grafana and Kubernetes metrics server deployments, all written in Python.
+This repository contains infrastructure-as-code examples and templates for both **Pulumi** and **Terraform**, supporting local development with Kind clusters and cloud providers (AWS EKS, GCP GKE).
 
-## Why Kind Instead of Minikube?
-
-**Kind (Kubernetes in Docker)** is much better suited for Pulumi workflows because:
-
-- ✅ **Pulumi can manage Kind clusters** - Kind clusters can be created and managed directly through Pulumi using the `pulumi-command` provider
-- ✅ **Docker-based** - Uses Docker containers, making it more consistent across platforms
-- ✅ **Faster startup** - Kind clusters start much faster than minikube
-- ✅ **Better resource usage** - More efficient resource usage compared to minikube
-- ✅ **Kubectl contexts** - Works seamlessly with kubectl contexts
-- ✅ **Production-like** - More similar to production Kubernetes environments
-
-## Project Structure
+## Repository Structure
 
 ```
-├── packages/                    # Reusable Pulumi packages (Python)
-│   ├── kind-cluster/           # Kind cluster management
-│   ├── grafana-helm/           # Grafana Helm chart deployment
-│   └── metrics-server-helm/    # Kubernetes metrics server Helm deployment
-├── nonprod/                    # Non-production environment
-├── prod/                       # Production environment
-└── utilities/                  # Common utilities and scripts (Python)
+├── pulumi/                    # Pulumi infrastructure examples
+│   ├── local/kind/           # Local Kind cluster (nonprod/prod)
+│   ├── aws/eks/              # AWS EKS cluster examples
+│   ├── gcp/gke/              # GCP GKE cluster examples
+│   ├── packages/             # Reusable Pulumi packages
+│   ├── utilities/            # Common utilities and scripts
+│   └── examples/             # Additional examples
+├── terraform/                 # Terraform infrastructure examples
+│   ├── local/kind/           # Local Kind cluster
+│   ├── aws/eks/              # AWS EKS cluster examples
+│   └── gcp/gke/              # GCP GKE cluster examples
+└── docs/                     # Documentation
 ```
-
-## Prerequisites
-
-- [Pulumi CLI](https://www.pulumi.com/docs/get-started/install/)
-- [Python](https://www.python.org/) (3.8 or later)
-- [Docker](https://www.docker.com/) (for Kind clusters)
-- [Kind](https://kind.sigs.k8s.io/docs/user/quick-start/) (Kubernetes in Docker)
-- [kubectl](https://kubernetes.io/docs/tasks/tools/)
 
 ## Quick Start
 
-1. **Install dependencies:**
-   ```powershell
-   python utilities/scripts/install-dependencies.py
-   ```
+### Local Development (Kind)
 
-2. **Deploy environments (MANUALLY):**
-   ```powershell
-   # Deploy nonprod (creates Kind cluster automatically)
-   cd nonprod
-   pulumi stack init nonprod
-   pulumi up
-   
-   # Deploy prod (creates Kind cluster automatically)
-   cd ../prod
-   pulumi stack init prod
-   pulumi up
-   ```
+Both Pulumi and Terraform support local Kubernetes development using Kind clusters.
 
-3. **Access services:**
-   - **Grafana:** http://localhost:30000 (admin/admin123 for nonprod, admin/prod-admin-2024! for prod)
-   - **Kubectl:** `kubectl config use-context nonprod-kind` or `kubectl config use-context prod-kind`
-
-## Packages
-
-### Kind Cluster Package (`packages/kind-cluster/`)
-Manages Kind cluster lifecycle and configuration using Pulumi's command provider.
-
-**Features:**
-- Cluster creation and management through Pulumi
-- Kubeconfig generation and management
-- Port mapping configuration
-- Multi-node cluster support
-- Python dataclasses for configuration
-
-### Grafana Helm Package (`packages/grafana-helm/`)
-Deploys Grafana using Helm charts.
-
-**Features:**
-- Grafana deployment with Helm
-- Configurable persistence
-- NodePort service configuration
-- Admin password management
-- Python dataclasses for configuration
-
-### Metrics Server Helm Package (`packages/metrics-server-helm/`)
-Deploys Kubernetes metrics server using Helm charts.
-
-**Features:**
-- Metrics server deployment
-- Configurable arguments
-- Resource limits and requests
-- High availability support
-- Python dataclasses for configuration
-
-## Environments
-
-### Nonprod Environment
-- **Cluster:** 1 control plane node, 0 worker nodes
-- **Grafana:** Single replica, 10Gi storage, accessible at localhost:30000
-- **Metrics Server:** Single replica
-
-### Prod Environment
-- **Cluster:** 1 control plane node, 1 worker node
-- **Grafana:** 2 replicas, 50Gi storage, accessible at localhost:30000
-- **Metrics Server:** 2 replicas
-
-## Usage
-
-### Deploying to Nonprod
-```powershell
-cd nonprod
-pulumi stack select nonprod
+#### Pulumi (Python)
+```bash
+cd pulumi/local/kind/nonprod
+pulumi stack init nonprod
 pulumi up
 ```
 
-### Deploying to Prod
-```powershell
-cd prod
-pulumi stack select prod
+#### Terraform
+```bash
+cd terraform/local/kind
+terraform init
+terraform apply
+```
+
+### Cloud Providers
+
+#### AWS EKS
+```bash
+# Pulumi
+cd pulumi/aws/eks
+pulumi stack init dev
+pulumi config set aws:region us-west-2
 pulumi up
+
+# Terraform
+cd terraform/aws/eks
+terraform init
+terraform apply
 ```
 
-### Accessing Services
+#### GCP GKE
+```bash
+# Pulumi
+cd pulumi/gcp/gke
+pulumi stack init dev
+pulumi config set gcp:project your-project-id
+pulumi up
 
-After deployment, you can access services:
-
-- **Grafana:** http://localhost:30000
-- **Admin Password:** Check the exported `grafanaAdminPassword` from Pulumi outputs
-- **Kubectl Context:** Use `kubectl config use-context <cluster-name>`
-
-### Managing Kind Clusters
-
-```powershell
-# List all Kind clusters
-python utilities/scripts/kind-management.py list
-
-# Create a Kind cluster manually
-python utilities/scripts/kind-management.py create my-cluster
-
-# Delete a Kind cluster
-python utilities/scripts/kind-management.py delete my-cluster
-
-# Switch kubectl context
-kubectl config use-context nonprod-kind
-kubectl config use-context prod-kind
+# Terraform
+cd terraform/gcp/gke
+terraform init
+terraform apply
 ```
 
-## Configuration
+## Features
 
-### Environment-specific Configuration
+### Local Development
+- **Kind Clusters**: Fast, Docker-based Kubernetes for local development
+- **Grafana Monitoring**: Pre-configured Grafana dashboards
+- **Metrics Server**: Kubernetes metrics collection
+- **Environment Management**: Separate nonprod/prod configurations
 
-Each environment has its own configuration file:
-- `nonprod/Pulumi.nonprod.yaml`
-- `prod/Pulumi.prod.yaml`
+### Cloud Providers
+- **AWS EKS**: Managed Kubernetes on AWS
+- **GCP GKE**: Managed Kubernetes on Google Cloud
+- **Networking**: VPC, subnets, security groups
+- **IAM/Security**: Proper role-based access control
 
-### Customizing Deployments
+### Infrastructure as Code
+- **Pulumi**: Python-based, supports multiple languages
+- **Terraform**: HCL-based, industry standard
+- **Reusable Components**: Modular packages and modules
+- **Best Practices**: Security, networking, and operational considerations
 
-You can customize deployments by modifying the configuration in each environment's `__main__.py` file or by updating the Pulumi configuration files.
+## Prerequisites
 
-## Python Packages
+### Common
+- [kubectl](https://kubernetes.io/docs/tasks/tools/)
+- [Docker](https://www.docker.com/)
 
-All packages are Python packages with `setup.py` files and can be installed using pip:
+### Pulumi
+- [Pulumi CLI](https://www.pulumi.com/docs/get-started/install/)
+- [Python](https://www.python.org/) (3.8 or later)
 
-```powershell
-# Install a specific package
-pip install -e packages/kind-cluster
+### Terraform
+- [Terraform](https://www.terraform.io/downloads.html) >= 1.0
 
-# Install all packages
-pip install -e packages/kind-cluster
-pip install -e packages/grafana-helm
-pip install -e packages/metrics-server-helm
-pip install -e utilities
-```
+### Local Development
+- [Kind](https://kind.sigs.k8s.io/docs/user/quick-start/)
 
-## Utilities
+### Cloud Providers
+- **AWS**: [AWS CLI](https://aws.amazon.com/cli/)
+- **GCP**: [gcloud CLI](https://cloud.google.com/sdk/docs/install)
 
-The `utilities/` directory contains:
-- Common utilities and helper functions (Python classes)
-- Kind cluster management scripts (Python)
-- Environment configuration helpers
+## Why This Structure?
 
-### Python Scripts
+### Monorepo Benefits
+- **Single Source of Truth**: All infrastructure code in one place
+- **Consistency**: Shared patterns and best practices
+- **Easy Comparison**: Side-by-side Pulumi vs Terraform examples
+- **Template Generation**: Easy to copy and customize for new projects
 
-- `utilities/scripts/install-dependencies.py` - Install all dependencies and check prerequisites
-- `utilities/scripts/kind-management.py` - Manage Kind clusters (create, delete, list)
+### Tool Comparison
+- **Pulumi**: Better for complex logic, multiple languages, state management
+- **Terraform**: Industry standard, extensive provider ecosystem, HCL simplicity
 
-## Troubleshooting
+### Environment Separation
+- **Local**: Kind clusters for development and testing
+- **Cloud**: Production-ready managed Kubernetes services
+- **Provider Agnostic**: Examples for both AWS and GCP
 
-### Common Issues
+## Getting Started
 
-1. **Kind not starting:** Ensure Docker is running and you have sufficient resources
-2. **Helm charts failing:** Check that the cluster is running and accessible
-3. **Resource limits:** Adjust memory and CPU settings in the configuration files
-4. **Python dependencies:** Ensure all packages are installed with `pip install -e .`
-5. **Port conflicts:** Ensure ports 30000-30001 are available
+1. **Choose your tool**: Pulumi or Terraform
+2. **Select environment**: Local (Kind) or Cloud (AWS/GCP)
+3. **Follow the README**: Each directory has detailed instructions
+4. **Customize**: Modify configurations for your needs
+5. **Deploy**: Follow the deployment instructions
 
-### Useful Commands
+## Documentation
 
-```powershell
-# Check Kind clusters
-kind get clusters
+- [Pulumi Examples](pulumi/README.md) - Detailed Pulumi documentation
+- [Terraform Examples](terraform/README.md) - Detailed Terraform documentation
+- [Local State Setup](LOCAL_STATE_SETUP.md) - Pulumi local state configuration
+- [Stack Structure](STACK_STRUCTURE.md) - Understanding the stack architecture
 
-# Check kubectl context
-kubectl config current-context
+## Contributing
 
-# List all resources in a namespace
-kubectl get all -n <namespace>
+This repository serves as a template and example collection. Feel free to:
 
-# Check logs
-kubectl logs -n <namespace> <pod-name>
-
-# Install Python dependencies
-pip install -r requirements.txt
-
-# Check Docker status
-docker ps
-```
-
-## Development
-
-### Adding New Packages
-
-1. Create a new directory in `packages/`
-2. Add `setup.py`, `__init__.py`, and implementation files
-3. Update environment dependencies in `requirements.txt`
-
-### Modifying Existing Packages
-
-1. Make changes to the package
-2. Reinstall the package: `pip install -e .`
-3. Update the environment that uses the package
-
-### Python Virtual Environments
-
-Each environment uses its own virtual environment:
-- `nonprod/venv/`
-- `prod/venv/`
-
-## Alternative Local Kubernetes Options
-
-If you prefer other local Kubernetes solutions:
-
-1. **Minikube** - Traditional local Kubernetes (requires manual cluster management)
-2. **K3s** - Lightweight Kubernetes (good for edge computing)
-3. **MicroK8s** - Ubuntu's lightweight Kubernetes
-4. **Docker Desktop Kubernetes** - Built into Docker Desktop
-
-However, **Kind is recommended** for Pulumi workflows because it can be managed directly through Pulumi.
+1. **Fork** the repository
+2. **Customize** for your specific needs
+3. **Add** new examples or providers
+4. **Improve** existing configurations
+5. **Share** your improvements
 
 ## License
 
-MIT License - see LICENSE file for details.
+MIT License - see [LICENSE](LICENSE) file for details.
+
+## Support
+
+- **Issues**: Use GitHub issues for bug reports and feature requests
+- **Discussions**: Use GitHub discussions for questions and ideas
+- **Documentation**: Check the README files in each directory for detailed instructions

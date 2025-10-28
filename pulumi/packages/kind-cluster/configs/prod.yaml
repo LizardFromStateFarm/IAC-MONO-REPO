@@ -7,10 +7,10 @@ node_memory: "2Gi"
 total_memory_limit: "4Gi"
 port_mappings:
   - containerPort: 30000
-    hostPort: 30000
+    hostPort: 30010
     protocol: "TCP"
   - containerPort: 30001
-    hostPort: 30001
+    hostPort: 30011
     protocol: "TCP"
 wait_for_ready: true
 wait_for_ready_timeout: "300s"
