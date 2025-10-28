@@ -1,6 +1,6 @@
 # Infrastructure as Code Monorepo
 
-This repository contains infrastructure-as-code examples and templates for both **Pulumi** and **Terraform**, supporting local development with Kind clusters and cloud providers (AWS EKS, GCP GKE).
+This repository contains infrastructure-as-code examples and templates for both **Pulumi** and **Terraform**, supporting local development with Kind clusters and cloud providers (AWS EKS, GCP GKE). Originally developed for testing and developing Kuboard, it now serves as a comprehensive infrastructure template repository.
 
 ## Repository Structure
 
