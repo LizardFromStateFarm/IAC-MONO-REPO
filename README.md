@@ -1,6 +1,6 @@
 # Pulumi Kind Monorepo (Python)
 
-This is a Pulumi monorepo project that manages Kind (Kubernetes in Docker) environments (nonprod and prod) with Grafana and Kubernetes metrics server deployments, all written in Python.
+This is a Pulumi monorepo project for use in testing and developing Kuboard. This manages Kind (Kubernetes in Docker) environments (nonprod and prod) with Grafana and Kubernetes metrics server deployments, all written in Python.
 
 ## Why Kind Instead of Minikube?
 
