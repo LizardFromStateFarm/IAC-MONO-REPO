@@ -6,46 +6,53 @@ This directory contains Terraform infrastructure-as-code examples for different 
 
 ```
 terraform/
-├── local/kind/          # Local Kind cluster examples
+├── local/
+│   └── k3s/            # Local K3s cluster examples (Podman)
 ├── aws/eks/            # AWS EKS cluster examples
 └── gcp/gke/            # GCP GKE cluster examples
 ```
 
-## Local Development (Kind)
+## Local Development
+
+### K3s with Podman (Recommended)
+
+The `local/k3s/` directory contains examples for local Kubernetes development using K3s with Podman as the container runtime.
+
+**Features:**
+- K3s cluster management with Podman
+- Better performance than Docker Desktop
+- Separate state management per component
+- Metrics server integration
+- Environment-specific configurations (nonprod/prod)
+
+**Quick Start:**
+```bash
+# Deploy nonprod environment
+cd local/k3s/nonprod
+.\deploy.ps1
+
+# Deploy prod environment
+cd local/k3s/prod
+.\deploy.ps1
+```
+
+### Kind with Docker (Legacy)
 
 The `local/kind/` directory contains examples for local Kubernetes development using Kind (Kubernetes in Docker).
 
-### Features
+**Features:**
 - Kind cluster creation and management
 - Configurable node counts and resources
 - Port mapping for service access
 - Template-based configuration
 
-### Quick Start
-
-1. **Prerequisites:**
-   - [Terraform](https://www.terraform.io/downloads.html) >= 1.0
-   - [Kind](https://kind.sigs.k8s.io/docs/user/quick-start/)
-   - [kubectl](https://kubernetes.io/docs/tasks/tools/)
-   - [Docker](https://www.docker.com/)
-
-2. **Deploy cluster:**
-   ```bash
-   cd local/kind
-   terraform init
-   terraform plan
-   terraform apply
-   ```
-
-3. **Verify cluster:**
-   ```bash
-   kubectl get nodes
-   ```
-
-4. **Clean up:**
-   ```bash
-   terraform destroy
-   ```
+**Quick Start:**
+```bash
+cd local/kind
+terraform init
+terraform plan
+terraform apply
+```
 
 ## Cloud Providers
 
@@ -102,8 +109,10 @@ terraform apply
 - [kubectl](https://kubernetes.io/docs/tasks/tools/)
 
 ### Local Development
-- [Kind](https://kind.sigs.k8s.io/docs/user/quick-start/)
-- [Docker](https://www.docker.com/)
+- [Podman](https://podman.io/) (for K3s clusters - recommended)
+- [K3s](https://k3s.io/) (for local K3s development)
+- [Kind](https://kind.sigs.k8s.io/docs/user/quick-start/) (for local Kind development)
+- [Docker](https://www.docker.com/) (for Kind clusters - fallback)
 
 ### AWS
 - [AWS CLI](https://aws.amazon.com/cli/)
