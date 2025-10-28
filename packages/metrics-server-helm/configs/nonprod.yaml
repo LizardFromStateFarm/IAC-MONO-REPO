@@ -1,6 +1,6 @@
 namespace: "kube-system"
 chart_version: "3.10.0"
 replicas: 1
-# Simplified config for local Kind cluster
-insecure_skip_tls_verify: true
+# Kind-specific configuration
 kubelet_insecure_tls: true
+use_official_approach: true

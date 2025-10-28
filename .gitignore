@@ -87,3 +87,6 @@ charts/
 # Local development
 .local/
 local/
+
+# AI Documentation
+REPOSITORY_SUMMARY.md

@@ -15,9 +15,9 @@ class MetricsServerHelmConfig:
     args: Optional[List[str]] = None
     host_network: Optional[bool] = False
     replicas: Optional[int] = 1
-    # Simplified config for local Kind clusters
-    insecure_skip_tls_verify: Optional[bool] = True
+    # Kind-specific configuration
     kubelet_insecure_tls: Optional[bool] = True
+    use_official_approach: Optional[bool] = True  # Use official metrics-server instead of Helm
 
     @classmethod
     def from_environment(cls, environment: str) -> 'MetricsServerHelmConfig':
@@ -38,111 +38,35 @@ class MetricsServerHelm(pulumi.ComponentResource):
     def __init__(self, name: str, config: MetricsServerHelmConfig, opts: Optional[pulumi.ResourceOptions] = None):
         super().__init__("metrics-server:helm", name, {}, opts)
         
+        # Use the working approach instead of Helm
+        if config.use_official_approach:
+            self._create_official_metrics_server(name, config, opts)
+        else:
+            self._create_helm_metrics_server(name, config, opts)
+    
+    def _create_official_metrics_server(self, name: str, config: MetricsServerHelmConfig, opts: Optional[pulumi.ResourceOptions] = None):
+        """Create metrics server using the official Kubernetes approach."""
         namespace = config.namespace or "kube-system"
         
-        # Create namespace if it's not kube-system
-        self.namespace = None
-        if namespace != "kube-system":
-            self.namespace = k8s.core.v1.Namespace(
-                f"{name}-namespace",
-                metadata=k8s.meta.v1.ObjectMetaArgs(
-                    name=namespace,
-                    labels={
-                        "app.kubernetes.io/name": "metrics-server",
-                        "app.kubernetes.io/instance": name,
-                    },
-                ),
-                opts=pulumi.ResourceOptions(parent=self)
-            )
+        # Import the simple metrics server implementation
+        from ..metrics_server_simple import MetricsServerSimple, MetricsServerSimpleConfig
         
-        # Simplified values for local Kind clusters
-        default_values = {
-            "replicas": config.replicas or 1,
-            "resources": {
-                "requests": {
-                    "memory": "100Mi",
-                    "cpu": "100m",
-                },
-                "limits": {
-                    "memory": "200Mi",
-                    "cpu": "200m",
-                },
-            },
-            "nodeSelector": {
-                "kubernetes.io/os": "linux",
-            },
-            "tolerations": [
-                {
-                    "key": "node-role.kubernetes.io/control-plane",
-                    "operator": "Exists",
-                    "effect": "NoSchedule",
-                },
-                {
-                    "key": "node-role.kubernetes.io/master",
-                    "operator": "Exists",
-                    "effect": "NoSchedule",
-                },
-            ],
-            # Simplified args for local development
-            "args": [
-                "--cert-dir=/tmp",
-                "--secure-port=4443",
-                "--kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname",
-                "--kubelet-use-node-status-port",
-                "--metric-resolution=15s",
-                "--kubelet-insecure-tls",  # Required for Kind clusters
-            ],
-            # Use HTTP instead of HTTPS for local development
-            "service": {
-                "port": 4443
-            },
-            "livenessProbe": {
-                "httpGet": {
-                    "path": "/livez",
-                    "port": 4443,
-                    "scheme": "HTTP"  # Changed from HTTPS to HTTP
-                },
-                "initialDelaySeconds": 20,
-                "periodSeconds": 10
-            },
-            "readinessProbe": {
-                "httpGet": {
-                    "path": "/readyz",
-                    "port": 4443,
-                    "scheme": "HTTP"  # Changed from HTTPS to HTTP
-                },
-                "initialDelaySeconds": 20,
-                "periodSeconds": 10
-            }
-        }
-        
-        # Merge with user-provided values
-        values = {**default_values, **(config.values or {})}
-        
-        # Deploy metrics-server using Helm
-        self.release = helm.v3.Release(
-            f"{name}-metrics-server",
-            chart="metrics-server",
-            version=config.chart_version,
-            repository_opts=helm.v3.RepositoryOptsArgs(
-                repo="https://kubernetes-sigs.github.io/metrics-server/",
-            ),
-            namespace=namespace,
-            values=values,
-            create_namespace=False,  # We're handling namespace creation separately
-            opts=pulumi.ResourceOptions(
-                parent=self,
-                depends_on=[self.namespace] if self.namespace else [],
-            )
+        # Convert Helm config to Simple config
+        simple_config = MetricsServerSimpleConfig(
+            namespace=config.namespace,
+            replicas=config.replicas,
+            kubelet_insecure_tls=config.kubelet_insecure_tls,
         )
         
-        self.namespace_name = pulumi.Output.from_input(namespace)
+        # Create the metrics server using the simple approach
+        self.metrics_server = MetricsServerSimple(f"{name}-official", simple_config, opts)
         
-    def is_ready(self) -> pulumi.Output[bool]:
-        """Check if the metrics server is ready."""
-        def check_ready(status):
-            if status and status.status == "deployed":
-                return True
-            return False
-        
-        return self.release.status.apply(check_ready)
+        # Export the same interface
+        self.namespace_name = self.metrics_server.namespace_name
+        self.is_ready = self.metrics_server.is_ready
+    
+    def _create_helm_metrics_server(self, name: str, config: MetricsServerHelmConfig, opts: Optional[pulumi.ResourceOptions] = None):
+        """Create metrics server using Helm (legacy approach - not recommended for Kind)."""
+        # This is kept for backward compatibility but not recommended
+        # The official approach should be used instead
+        raise NotImplementedError("Helm approach is deprecated. Use use_official_approach=True instead.")

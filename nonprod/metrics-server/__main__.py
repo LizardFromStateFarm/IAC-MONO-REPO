@@ -20,14 +20,14 @@ kubeconfig = kind_stack.get_output("kubeconfig")
 # Create Kubernetes provider using the Kind cluster kubeconfig
 k8s_provider = k8s.Provider("metrics-server-provider", kubeconfig=kubeconfig)
 
-# Create simplified metrics server config for local Kind cluster
+# Create metrics server config using simple approach
 metrics_config = MetricsServerSimpleConfig(
     namespace="kube-system",
     replicas=1,
-    image="registry.k8s.io/metrics-server/metrics-server:v0.6.4"
+    kubelet_insecure_tls=True  # Required for Kind clusters
 )
 
-# Deploy metrics server using simplified approach
+# Deploy metrics server using simple approach
 metrics_server = MetricsServerSimple("nonprod-metrics-server", metrics_config, opts=pulumi.ResourceOptions(provider=k8s_provider))
 
 # Export important values

@@ -24,7 +24,8 @@ k8s_provider = k8s.Provider("metrics-server-provider", kubeconfig=kubeconfig)
 metrics_config = MetricsServerSimpleConfig(
     namespace="kube-system",
     replicas=1,
-    image="registry.k8s.io/metrics-server/metrics-server:v0.6.4"
+    image="registry.k8s.io/metrics-server/metrics-server:v0.6.4",
+    kubelet_insecure_tls=True  # Required for Kind clusters
 )
 
 # Deploy metrics server using simplified approach
